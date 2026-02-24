@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ambalator Keren</title>
+    <title>Ambatron - The Smart Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
         :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
+            --bg: #0f1115;
+            --card-bg: rgba(30, 32, 35, 0.7);
+            --primary: #818cf8;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --accent: #22d3ee;
+            --success: #34d399;
+            --error: #fb7185;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f1115);
             color: var(--text);
             display: flex;
             justify-content: center;
@@ -24,172 +31,232 @@
             margin: 0;
         }
 
-        .calc-card {
-            background: var(--card);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            width: 100%;
+        .container {
+            width: 90%;
             max-width: 400px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary); }
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
 
-        .screen {
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #334155;
+        h2 { font-weight: 600; letter-spacing: -0.5px; margin-bottom: 25px; text-align: center; }
+
+        /* --- UI KALKULATOR --- */
+        .display-area {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            text-align: right;
         }
 
         input {
             width: 100%;
             background: transparent;
             border: none;
-            color: #fff;
-            font-size: 1.2rem;
+            color: var(--text);
+            font-size: 1.1rem;
             outline: none;
-            margin-bottom: 5px;
+            text-align: right;
+            font-family: 'Inter', sans-serif;
         }
 
         #result {
+            font-size: 1.6rem;
+            font-weight: 600;
             color: var(--primary);
-            font-weight: bold;
-            font-size: 1.4rem;
-            min-height: 30px;
-            word-break: break-all;
+            margin-top: 8px;
+            min-height: 32px;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
         button {
-            padding: 15px;
+            height: 60px;
+            border-radius: 16px;
             border: none;
-            border-radius: 8px;
-            background: #334155;
-            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
             font-size: 1.1rem;
+            font-weight: 400;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
         }
 
-        button:hover { background: #475569; transform: translateY(-2px); }
+        button:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        .btn-op { color: var(--accent); font-weight: 600; }
+        .btn-eq { background: var(--primary); color: white; grid-column: span 2; }
+        .btn-eq:hover { background: #6366f1; }
+
+        /* --- UI GAME --- */
+        .btn-diff {
+            width: 100%;
+            margin-bottom: 12px;
+            height: 55px;
+            text-align: left;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #game-play-zone { display: none; text-align: center; }
+        .q-text { font-size: 2rem; font-weight: 600; margin: 30px 0; }
         
-        .btn-op { background: var(--primary); }
-        .btn-op:hover { background: #4f46e5; }
-
-        .btn-clear { background: #ef4444; grid-column: span 2; }
-        .btn-equal { background: #10b981; grid-column: span 2; }
-
-        .guide {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: #94a3b8;
+        .ans-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-size: 1.2rem;
+            box-sizing: border-box;
+            margin-bottom: 15px;
         }
+
+        .link-switch {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .link-switch:hover { color: var(--primary); }
+
+        /* Animation Classes */
+        .hidden { opacity: 0; transform: scale(0.95); pointer-events: none; position: absolute; width: 340px; }
+        .visible { opacity: 1; transform: scale(1); position: relative; }
     </style>
 </head>
 <body>
 
-<div class="calc-card">
-    <h1>Ambalator Pintar</h1>
-    
-    <div class="screen">
-        <input type="text" id="input" placeholder="Ketik soal di sini..." autocomplete="off">
-        <div id="result">Hasil: </div>
+<div class="container">
+    <div id="calc-section" class="glass-card visible">
+        <h2>Algebro</h2>
+        <div class="display-area">
+            <input type="text" id="input" placeholder="0" readonly>
+            <div id="result">0</div>
+        </div>
+        <div class="grid">
+            <button onclick="addChar('7')">7</button><button onclick="addChar('8')">8</button><button onclick="addChar('9')">9</button><button class="btn-op" onclick="addChar('/')">÷</button>
+            <button onclick="addChar('4')">4</button><button onclick="addChar('5')">5</button><button onclick="addChar('6')">6</button><button class="btn-op" onclick="addChar('*')">×</button>
+            <button onclick="addChar('1')">1</button><button onclick="addChar('2')">2</button><button onclick="addChar('3')">3</button><button class="btn-op" onclick="addChar('-')">−</button>
+            <button onclick="addChar('0')">0</button><button onclick="addChar('.')">.</button><button onclick="addChar('x')">x</button><button class="btn-op" onclick="addChar('+')">+</button>
+            <button onclick="addChar('^')">^</button><button onclick="clearAll()">C</button>
+            <button class="btn-eq" onclick="calculate()">=</button>
+        </div>
+        <span class="link-switch" onclick="switchView('game')">Buka Tantangan Matematika →</span>
     </div>
 
-    <div class="grid">
-        <button class="btn-clear" onclick="clearAll()">Clear</button>
-        <button onclick="addChar('(')">(</button>
-        <button onclick="addChar(')')">)</button>
+    <div id="game-section" class="glass-card hidden">
+        <div id="difficulty-selection">
+            <h2>Pilih Kesulitan</h2>
+            <button class="btn-diff" onclick="startGame('easy')">Easy <span>10 Soal</span></button>
+            <button class="btn-diff" onclick="startGame('medium')">Medium <span>25 Soal</span></button>
+            <button class="btn-diff" onclick="startGame('hard')">Hard <span>35 Soal</span></button>
+            <span class="link-switch" onclick="switchView('calc')">← Kembali ke Kalkulator</span>
+        </div>
 
-        <button onclick="addChar('7')">7</button>
-        <button onclick="addChar('8')">8</button>
-        <button onclick="addChar('9')">9</button>
-        <button class="btn-op" onclick="addChar('/')">÷</button>
-
-        <button onclick="addChar('4')">4</button>
-        <button onclick="addChar('5')">5</button>
-        <button onclick="addChar('6')">6</button>
-        <button class="btn-op" onclick="addChar('*')">×</button>
-
-        <button onclick="addChar('1')">1</button>
-        <button onclick="addChar('2')">2</button>
-        <button onclick="addChar('3')">3</button>
-        <button class="btn-op" onclick="addChar('-')">-</button>
-
-        <button onclick="addChar('0')">0</button>
-        <button onclick="addChar('.')">.</button>
-        <button onclick="addChar('x')">x</button>
-        <button class="btn-op" onclick="addChar('+')">+</button>
-
-        <button onclick="addChar('^')">^</button>
-        <button onclick="addChar('sqrt(')">√</button>
-        <button class="btn-equal" onclick="calculate()">HITUNG</button>
-    </div>
-
-    <div class="guide">
-        <b>Tips Aljabar:</b><br>
-        • Ketik: <code style="color:white">2x + 3x</code> → Hasil: <code style="color:white">5x</code><br>
-        • Ketik: <code style="color:white">x * x</code> → Hasil: <code style="color:white">x^2</code><br>
-        • Pangkat: <code style="color:white">5^2</code> atau Akar: <code style="color:white">sqrt(16)</code>
+        <div id="game-play-zone">
+            <div style="color: var(--text-dim); font-size: 0.8rem;" id="progress-text">SOAL 1 DARI 10</div>
+            <div class="q-text" id="question">12 + 5</div>
+            <input type="number" class="ans-input" id="game-input" placeholder="Jawaban">
+            <div id="game-feedback" style="min-height: 20px; font-size: 0.9rem; margin-bottom: 15px;"></div>
+            <button class="btn-eq" style="width:100%" onclick="checkAnswer()">Konfirmasi</button>
+        </div>
     </div>
 </div>
 
 <script>
+    // Transisi View
+    function switchView(target) {
+        const calc = document.getElementById('calc-section');
+        const game = document.getElementById('game-section');
+        if(target === 'game') {
+            calc.className = 'glass-card hidden';
+            setTimeout(() => { game.className = 'glass-card visible'; }, 400);
+        } else {
+            game.className = 'glass-card hidden';
+            setTimeout(() => { calc.className = 'glass-card visible'; }, 400);
+        }
+    }
+
+    // Kalkulator
     const inputField = document.getElementById('input');
     const resultField = document.getElementById('result');
-
-    function addChar(char) {
-        inputField.value += char;
-    }
-
-    function clearAll() {
-        inputField.value = '';
-        resultField.innerText = 'Hasil: ';
-    }
-
+    function addChar(c) { inputField.value += c; }
+    function clearAll() { inputField.value = ''; resultField.innerText = '0'; }
     function calculate() {
-        const val = inputField.value;
-        if (!val) return;
-
         try {
-            // Kita coba evaluasi secara angka dulu
-            const evalResult = math.evaluate(val);
-            
-            // Jika hasilnya berupa fungsi atau simbol (aljabar), kita sederhanakan
-            if (typeof evalResult === 'function' || val.includes('x') || val.includes('y')) {
-                const simplified = math.simplify(val).toString();
-                resultField.innerText = "= " + simplified;
-            } else {
-                resultField.innerText = "= " + evalResult;
-            }
-        } catch (err) {
-            // Jika gagal evaluate, mungkin itu ekspresi aljabar murni
-            try {
-                const simplified = math.simplify(val).toString();
-                resultField.innerText = "= " + simplified;
-            } catch (innerErr) {
-                resultField.innerText = "Error: Input salah";
-            }
+            const val = inputField.value;
+            if(!val) return;
+            const res = math.evaluate(val);
+            resultField.innerText = (typeof res === 'number') ? Number(res.toFixed(4)) : math.simplify(val).toString();
+        } catch(e) { resultField.innerText = "Error"; }
+    }
+
+    // Game Logic
+    let gState = { lvl: '', cur: 1, total: 0, ans: '' };
+
+    function startGame(lvl) {
+        gState.lvl = lvl;
+        gState.cur = 1;
+        gState.total = lvl === 'easy' ? 10 : lvl === 'medium' ? 25 : 35;
+        document.getElementById('difficulty-selection').style.display = 'none';
+        document.getElementById('game-play-zone').style.display = 'block';
+        genQ();
+    }
+
+    function genQ() {
+        let q = ""; let a = 0;
+        if(gState.lvl === 'easy') {
+            let x = math.randomInt(1,20), y = math.randomInt(1,20);
+            q = `${x} + ${y}`; a = x + y;
+        } else if(gState.lvl === 'medium') {
+            let x = math.randomInt(5,15), y = math.randomInt(5,15);
+            q = `${x} × ${y}`; a = x * y;
+        } else {
+            let x = math.randomInt(2,10);
+            q = `x + ${x} = ${x+x+5}, x?`; a = x+5;
+        }
+        document.getElementById('question').innerText = q;
+        gState.ans = a;
+        document.getElementById('progress-text').innerText = `SOAL ${gState.cur} DARI ${gState.total}`;
+        document.getElementById('game-input').value = '';
+        document.getElementById('game-feedback').innerText = '';
+    }
+
+    function checkAnswer() {
+        const u = document.getElementById('game-input').value;
+        const f = document.getElementById('game-feedback');
+        if(u == gState.ans) {
+            f.innerText = "Luar biasa!"; f.style.color = 'var(--success)';
+            setTimeout(() => {
+                if(gState.cur < gState.total) { gState.cur++; genQ(); }
+                else { alert("Misi Selesai!"); backToCalc(); }
+            }, 600);
+        } else {
+            f.innerText = "Coba lagi, ya!"; f.style.color = 'var(--error)';
         }
     }
 
-    // Biar bisa tekan "Enter" untuk hitung
-    inputField.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            calculate();
-        }
-    });
+    function backToCalc() {
+        document.getElementById('difficulty-selection').style.display = 'block';
+        document.getElementById('game-play-zone').style.display = 'none';
+        switchView('calc');
+    }
 </script>
-
 </body>
 </html>
