@@ -1,37 +1,195 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/algebrite/1.4.0/algebrite.bundle-for-browser.js"></script>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Aljabar Pintar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
-      body { font-family: sans-serif; padding: 20px; text-align: center; }
-      input { padding: 10px; width: 70%; margin-bottom: 10px; }
-      button { padding: 10px 20px; cursor: pointer; background: #4285f4; color: white; border: none; }
-      #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; color: #d93025; }
-    </style>
-  </head>
-  <body>
-    <h2>Kalkulator Aljabar</h2>
-    <input type="text" id="question" placeholder="Contoh: expand((x + 1)^2) atau simplify(x + x)">
-    <br>
-    <button onclick="hitung()">Selesaikan!</button>
-    
-    <div id="result"></div>
-
-    <script>
-      function hitung() {
-        const input = document.getElementById('question').value;
-        const display = document.getElementById('result');
-        
-        try {
-          // Menggunakan Algebrite untuk menghitung
-          // eval() di Algebrite akan memproses string matematika
-          const hasil = Algebrite.run(input);
-          display.innerHTML = "Hasil: " + hasil;
-        } catch (err) {
-          display.innerHTML = "Error: Pastikan format benar.";
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
         }
-      }
-    </script>
-  </body>
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .calc-card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary); }
+
+        .screen {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            outline: none;
+            margin-bottom: 5px;
+        }
+
+        #result {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.4rem;
+            min-height: 30px;
+            word-break: break-all;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #334155;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { background: #475569; transform: translateY(-2px); }
+        
+        .btn-op { background: var(--primary); }
+        .btn-op:hover { background: #4f46e5; }
+
+        .btn-clear { background: #ef4444; grid-column: span 2; }
+        .btn-equal { background: #10b981; grid-column: span 2; }
+
+        .guide {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calc-card">
+    <h1>Gemini Math Engine</h1>
+    
+    <div class="screen">
+        <input type="text" id="input" placeholder="Ketik soal di sini..." autocomplete="off">
+        <div id="result">Hasil: </div>
+    </div>
+
+    <div class="grid">
+        <button class="btn-clear" onclick="clearAll()">Clear</button>
+        <button onclick="addChar('(')">(</button>
+        <button onclick="addChar(')')">)</button>
+
+        <button onclick="addChar('7')">7</button>
+        <button onclick="addChar('8')">8</button>
+        <button onclick="addChar('9')">9</button>
+        <button class="btn-op" onclick="addChar('/')">÷</button>
+
+        <button onclick="addChar('4')">4</button>
+        <button onclick="addChar('5')">5</button>
+        <button onclick="addChar('6')">6</button>
+        <button class="btn-op" onclick="addChar('*')">×</button>
+
+        <button onclick="addChar('1')">1</button>
+        <button onclick="addChar('2')">2</button>
+        <button onclick="addChar('3')">3</button>
+        <button class="btn-op" onclick="addChar('-')">-</button>
+
+        <button onclick="addChar('0')">0</button>
+        <button onclick="addChar('.')">.</button>
+        <button onclick="addChar('x')">x</button>
+        <button class="btn-op" onclick="addChar('+')">+</button>
+
+        <button onclick="addChar('^')">^</button>
+        <button onclick="addChar('sqrt(')">√</button>
+        <button class="btn-equal" onclick="calculate()">HITUNG</button>
+    </div>
+
+    <div class="guide">
+        <b>Tips Aljabar:</b><br>
+        • Ketik: <code style="color:white">2x + 3x</code> → Hasil: <code style="color:white">5x</code><br>
+        • Ketik: <code style="color:white">x * x</code> → Hasil: <code style="color:white">x^2</code><br>
+        • Pangkat: <code style="color:white">5^2</code> atau Akar: <code style="color:white">sqrt(16)</code>
+    </div>
+</div>
+
+<script>
+    const inputField = document.getElementById('input');
+    const resultField = document.getElementById('result');
+
+    function addChar(char) {
+        inputField.value += char;
+    }
+
+    function clearAll() {
+        inputField.value = '';
+        resultField.innerText = 'Hasil: ';
+    }
+
+    function calculate() {
+        const val = inputField.value;
+        if (!val) return;
+
+        try {
+            // Kita coba evaluasi secara angka dulu
+            const evalResult = math.evaluate(val);
+            
+            // Jika hasilnya berupa fungsi atau simbol (aljabar), kita sederhanakan
+            if (typeof evalResult === 'function' || val.includes('x') || val.includes('y')) {
+                const simplified = math.simplify(val).toString();
+                resultField.innerText = "= " + simplified;
+            } else {
+                resultField.innerText = "= " + evalResult;
+            }
+        } catch (err) {
+            // Jika gagal evaluate, mungkin itu ekspresi aljabar murni
+            try {
+                const simplified = math.simplify(val).toString();
+                resultField.innerText = "= " + simplified;
+            } catch (innerErr) {
+                resultField.innerText = "Error: Input salah";
+            }
+        }
+    }
+
+    // Biar bisa tekan "Enter" untuk hitung
+    inputField.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            calculate();
+        }
+    });
+</script>
+
+</body>
 </html>
